@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: connectflow_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-connect_flow}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # WhatsApp Engine
+  engine:
+    build: 
+      context: ./engine
+      dockerfile: Dockerfile
+    container_name: connectflow_engine
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      # Internal URL for Engine to talk to Dashboard (if needed later)
+      # DASHBOARD_URL: http://dashboard:3000 
+    volumes:
+      - ./engine/auth_info_baileys:/usr/src/app/auth_info_baileys # Persist sessions!
+    networks:
+      - app_network
+
+  # Dashboard (Frontend + API)
+  dashboard:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: connectflow_dashboard
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-connect_flow}
+      # URL to access Engine from Backend Side (Docker network)
+      # Since we are proxying via Next.js API, Next.js server needs to reach Engine
+      # If Next.js runs on server, it can reach engine by service name 'engine'
+      NEXT_PUBLIC_API_URL: http://localhost:3000 # Public URL for browser
+    depends_on:
+      - postgres
+      - engine
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
