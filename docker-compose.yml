@@ -43,7 +43,7 @@ services:
     ports:
       - "3002:3000"
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-connect_flow}
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@host.docker.internal:5432/${POSTGRES_DB:-connect_flow}
       # URL to access Engine from Backend Side (Docker network)
       # Since we are proxying via Next.js API, Next.js server needs to reach Engine
       # If Next.js runs on server, it can reach engine by service name 'engine'
@@ -51,8 +51,8 @@ services:
     depends_on:
       - postgres
       - engine
-    links:
-      - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app_network
 
