@@ -17,7 +17,7 @@ services:
 
   # WhatsApp Engine
   engine:
-    build: 
+    build:
       context: ./engine
       dockerfile: Dockerfile
     container_name: connectflow_engine
@@ -35,19 +35,19 @@ services:
 
   # Dashboard (Frontend + API)
   dashboard:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: connectflow_dashboard
     restart: always
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-connect_flow}
       # URL to access Engine from Backend Side (Docker network)
       # Since we are proxying via Next.js API, Next.js server needs to reach Engine
       # If Next.js runs on server, it can reach engine by service name 'engine'
-      NEXT_PUBLIC_API_URL: http://localhost:3000 # Public URL for browser
+      NEXT_PUBLIC_API_URL: http://51.81.101.217:3002 # Public URL for browser
     depends_on:
       - postgres
       - engine
@@ -56,6 +56,7 @@ services:
 
 volumes:
   postgres_data:
+
 
 networks:
   app_network:
