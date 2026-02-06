@@ -27,6 +27,9 @@ ENV NODE_ENV production
 # Install OpenSSL for Prisma compatibility
 RUN apk add --no-cache openssl
 
+# Install Prisma globally to avoid npx download issues at runtime
+RUN npm install -g prisma@5.22.0
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
