@@ -14,6 +14,9 @@ RUN npm install -g typescript ts-node
 # Create directory for sessions
 RUN mkdir -p auth_info_baileys
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 EXPOSE 4000
 
 CMD ["npm", "run", "dev"] 

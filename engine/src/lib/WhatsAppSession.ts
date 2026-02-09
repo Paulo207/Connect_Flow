@@ -11,6 +11,7 @@ import { Boom } from "@hapi/boom";
 import pino from "pino";
 import fs from "fs";
 import path from "path";
+import { WebhookDispatcher } from "./WebhookDispatcher";
 
 export class WhatsAppSession {
     private socket: WASocket | null = null;
@@ -27,6 +28,8 @@ export class WhatsAppSession {
             fs.mkdirSync(this.folderPath, { recursive: true });
         }
     }
+
+
 
     async start() {
         this.status = "connecting";
@@ -46,8 +49,19 @@ export class WhatsAppSession {
 
         this.socket.ev.on("creds.update", saveCreds);
 
+        // Webhook for New Messages
+        this.socket.ev.on("messages.upsert", async (m) => {
+            if (m.type === "notify") {
+                // console.log(JSON.stringify(m, undefined, 2));
+                await WebhookDispatcher.dispatch(this.sessionId, "messages.upsert", m);
+            }
+        });
+
         this.socket.ev.on("connection.update", (update: Partial<ConnectionState>) => {
             const { connection, lastDisconnect, qr } = update;
+
+            // Dispatch Connection Update Webhook
+            WebhookDispatcher.dispatch(this.sessionId, "connection.update", update);
 
             if (qr) {
                 this.qrCode = qr;

@@ -26,8 +26,9 @@ services:
       - "4000:4000"
     environment:
       PORT: 4000
-      # Internal URL for Engine to talk to Dashboard (if needed later)
-      # DASHBOARD_URL: http://dashboard:3000 
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@host.docker.internal:5432/${POSTGRES_DB:-connect_flow}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./engine/auth_info_baileys:/usr/src/app/auth_info_baileys # Persist sessions!
     networks:

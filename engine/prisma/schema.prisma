@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Instance {
+  id        String   @id @default(uuid())
+  name      String
+  token     String   @unique
+  status    String   @default("disconnected") // connected, disconnected, qr_ready
+  serverUrl String?
+  
+  // Webhooks
+  webhookUrlSend       String?
+  webhookUrlReceive    String?
+  webhookUrlConnect    String?
+  webhookUrlDisconnect String?
+  
+  // Settings
+  settingsRejectCalls    Boolean @default(false)
+  settingsReadMessages   Boolean @default(false)
+  settingsReadStatus     Boolean @default(false)
+  settingsNotifyOwn      Boolean @default(false)
+  settingsDisableQueue   Boolean @default(false)
+
+  // Legacy field support (optional, can keep or remove if migrating fully)
+  webhookUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
